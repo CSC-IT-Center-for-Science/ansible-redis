@@ -1,0 +1,3 @@
+{{ ansible_managed | comment }}
+
+{{ redis_sysconfig | encode_ini(quote='"', section_is_comment=true, ucase_prop=true) }}

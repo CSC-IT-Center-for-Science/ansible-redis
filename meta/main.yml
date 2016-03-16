@@ -4,7 +4,7 @@ galaxy_info:
   author: Jiri Tyr
   description: A role that installs Redis
   license: MIT
-  min_ansible_version: 1.8
+  min_ansible_version: 2.0
   platforms:
     - name: EL
       versions:

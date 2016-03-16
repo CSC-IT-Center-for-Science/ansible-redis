@@ -5,8 +5,8 @@
     that: ansible_os_family == "RedHat"
 
 - name: Install Redis
-  yum:
-    name: redis
+  package:
+    name: "{{ redis_pkg }}"
   notify:
     - Restart Redis
   tags:
@@ -15,19 +15,25 @@
 - name: Configure Redis
   template:
     src: redis.conf.j2
-    dest: /etc/redis.conf
+    dest: "{{ redis_config_location }}"
   notify:
     - Restart Redis
   tags:
     - redis_config
 
-- name: Copy sysconfig file
-  copy:
-    src: redis_sysconfig
+- name: Configure Redis sysconfig file
+  template:
+    src: redis_sysconfig.j2
     dest: /etc/sysconfig/redis
+  notify:
+    - Restart Redis
+  tags:
+    - redis_config
 
 - name: Enable and start Redis
   service:
     name: redis
     state: started
     enabled: true
+  tags:
+    - redis_service

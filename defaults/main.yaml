@@ -1,5 +1,31 @@
 ---
 
+# Redis package name (an explicit version can be specified here)
+redis_pkg: redis
+
+# Path to the redis config file
+redis_config_location: /etc/redis.conf
+
+# Username under which Redis runs
+redis_user: redis
+
+
+# Default sysconfig
+redis_sysconfig__default:
+    Default config file location:
+        redis_config: "{{ redis_config_location }}"
+    Default user name:
+        redis_user: "{{ redis_user }}"
+
+# Custom sysconfig
+redis_sysconfig__custom: {}
+
+# Final sysconfig
+redis_sysconfig: "{{
+    redis_sysconfig__default.update(redis_sysconfig__custom) }}{{
+    redis_sysconfig__default }}"
+
+
 # General
 redis_general_daemonize: "yes"
 redis_general_pidfile: /var/run/redis/redis.pid
@@ -259,7 +285,17 @@ redis_advanced_2_6: &redis_advanced_2_6
   aof-rewrite-incremental-fsync: "{{ redis_advanced_aof_rewrite_incremental_fsync }}"
 
 redis_advanced_2_8: &redis_advanced_2_8
-  << : *redis_advanced_2_6
+  list-max-ziplist-entries: "{{ redis_advanced_list_max_ziplist_entries }}"
+  list-max-ziplist-value: "{{ redis_advanced_list_max_ziplist_value }}"
+  set-max-intset-entries: "{{ redis_advanced_set_max_intset_entries }}"
+  zset-max-ziplist-entries: "{{ redis_advanced_zset_max_ziplist_entries }}"
+  zset-max-ziplist-value: "{{ redis_advanced_zset_max_ziplist_value }}"
+  activerehashing: "{{ redis_advanced_activerehashing }}"
+  hash-max-ziplist-entries: "{{ redis_advanced_hash_max_ziplist_entries }}"
+  hash-max-ziplist-value: "{{ redis_advanced_hash_max_ziplist_value }}"
+  client-output-buffer-limit: "{{ redis_advanced_client_output_buffer_limit }}"
+  hz: "{{ redis_advanced_hz }}"
+  aof-rewrite-incremental-fsync: "{{ redis_advanced_aof_rewrite_incremental_fsync }}"
   hll-sparse-max-bytes: "{{ redis_advanced_hll_sparse_max_bytes }}"
 
 
@@ -306,4 +342,4 @@ redis_config_2_8: &redis_config_2_8
   advanced: "{{ redis_advanced_2_8 }}"
 
 redis_config:
-  << : *redis_config_2_4
+  << : *redis_config_2_8

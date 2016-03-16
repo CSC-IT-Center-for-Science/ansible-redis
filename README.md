@@ -57,21 +57,49 @@ Examples
     - redis
 ```
 
-This role requires [Config Encoder
-Macros](https://github.com/picotrading/config-encoder-macros) which must be
-placed into the same directory as the playbook:
+This role requires [Config
+Encoders](https://github.com/jtyr/ansible/blob/jtyr-config_encoders/lib/ansible/plugins/filter/config_encoders.py)
+which must be configured in the `ansible.cfg` file like this:
 
 ```
-$ ls -1 *.yaml
-site.yaml
-$ git clone https://github.com/picotrading/config-encoder-macros.git ./templates/encoder
+[defaults]
+
+filter_plugins = ./plugins/filter/
 ```
+
+Where the `./plugins/filter/` containes the `config_encoders.py` file.
 
 
 Role variables
 --------------
 
 ```
+# Redis package name (an explicit version can be specified here)
+redis_pkg: redis
+
+# Path to the redis config file
+redis_config_location: /etc/redis.conf
+
+# Username under which Redis runs
+redis_user: redis
+
+
+# Default sysconfig
+redis_sysconfig__default:
+    Default config file location:
+        redis_config: "{{ redis_config_location }}"
+    Default user name:
+        redis_user: "{{ redis_user }}"
+
+# Custom sysconfig
+redis_sysconfig__custom: {}
+
+# Final sysconfig
+redis_sysconfig: "{{
+    redis_sysconfig__default.update(redis_sysconfig__custom) }}{{
+    redis_sysconfig__default }}"
+
+
 # General
 redis_general_daemonize: "yes"
 redis_general_pidfile: /var/run/redis/redis.pid
@@ -195,7 +223,7 @@ redis_security_2_8: &redis_security_2_8
 
 # Limits
 redis_limits_maxclients: 10000
-redis_limits_maxmemory: 524288
+redis_limits_maxmemory: 128000000
 redis_limits_maxmemory_policy: volatile-lru
 redis_limits_maxmemory_samples: 3
 
@@ -212,29 +240,29 @@ redis_limits_2_8: &redis_limits_2_8
   << : *redis_limits_2_6
 
 
-# Append mode only
-redis_amo_appendonly: "no"
-redis_amo_appendfilename: appendonly.aof
-redis_amo_appendfsync: everysec
-redis_amo_no_appendfsync_on_rewrite: "no"
-redis_amo_auto_aof_rewrite_percentage: 100
-redis_amo_auto_aof_rewrite_min_size: 64mb
-redis_amo_aof_load_truncated: "yes"
+# Append only mode
+redis_aom_appendonly: "no"
+redis_aom_appendfilename: appendonly.aof
+redis_aom_appendfsync: everysec
+redis_aom_no_appendfsync_on_rewrite: "no"
+redis_aom_auto_aof_rewrite_percentage: 100
+redis_aom_auto_aof_rewrite_min_size: 64mb
+redis_aom_aof_load_truncated: "yes"
 
-redis_amo_2_4: &redis_amo_2_4
-  appendonly: "{{ redis_amo_appendonly }}"
-  appendfsync: "{{ redis_amo_appendfsync }}"
-  no-appendfsync-on-rewrite: "{{ redis_amo_no_appendfsync_on_rewrite }}"
-  auto-aof-rewrite-percentage: "{{ redis_amo_auto_aof_rewrite_percentage }}"
-  auto-aof-rewrite-min-size: "{{ redis_amo_auto_aof_rewrite_min_size }}"
+redis_aom_2_4: &redis_aom_2_4
+  appendonly: "{{ redis_aom_appendonly }}"
+  appendfsync: "{{ redis_aom_appendfsync }}"
+  no-appendfsync-on-rewrite: "{{ redis_aom_no_appendfsync_on_rewrite }}"
+  auto-aof-rewrite-percentage: "{{ redis_aom_auto_aof_rewrite_percentage }}"
+  auto-aof-rewrite-min-size: "{{ redis_aom_auto_aof_rewrite_min_size }}"
 
-redis_amo_2_6: &redis_amo_2_6
-  << : *redis_amo_2_4
+redis_aom_2_6: &redis_aom_2_6
+  << : *redis_aom_2_4
 
-redis_amo_2_8: &redis_amo_2_8
-  << : *redis_amo_2_6
-  appendfilename: "{{ redis_amo_appendfilename }}"
-  aof-load-truncated: "{{ redis_amo_aof_load_truncated }}"
+redis_aom_2_8: &redis_aom_2_8
+  << : *redis_aom_2_6
+  appendfilename: "{{ redis_aom_appendfilename }}"
+  aof-load-truncated: "{{ redis_aom_aof_load_truncated }}"
 
 
 # Lua scripting
@@ -331,7 +359,17 @@ redis_advanced_2_6: &redis_advanced_2_6
   aof-rewrite-incremental-fsync: "{{ redis_advanced_aof_rewrite_incremental_fsync }}"
 
 redis_advanced_2_8: &redis_advanced_2_8
-  << : *redis_advanced_2_6
+  list-max-ziplist-entries: "{{ redis_advanced_list_max_ziplist_entries }}"
+  list-max-ziplist-value: "{{ redis_advanced_list_max_ziplist_value }}"
+  set-max-intset-entries: "{{ redis_advanced_set_max_intset_entries }}"
+  zset-max-ziplist-entries: "{{ redis_advanced_zset_max_ziplist_entries }}"
+  zset-max-ziplist-value: "{{ redis_advanced_zset_max_ziplist_value }}"
+  activerehashing: "{{ redis_advanced_activerehashing }}"
+  hash-max-ziplist-entries: "{{ redis_advanced_hash_max_ziplist_entries }}"
+  hash-max-ziplist-value: "{{ redis_advanced_hash_max_ziplist_value }}"
+  client-output-buffer-limit: "{{ redis_advanced_client_output_buffer_limit }}"
+  hz: "{{ redis_advanced_hz }}"
+  aof-rewrite-incremental-fsync: "{{ redis_advanced_aof_rewrite_incremental_fsync }}"
   hll-sparse-max-bytes: "{{ redis_advanced_hll_sparse_max_bytes }}"
 
 
@@ -349,7 +387,7 @@ redis_config_2_4: &redis_config_2_4
   replication: "{{ redis_replication_2_4 }}"
   security: "{{ redis_security_2_4 }}"
   limits: "{{ redis_limits_2_4 }}"
-  "append mode only": "{{ redis_amo_2_4 }}"
+  "append only mode": "{{ redis_aom_2_4 }}"
   "slow log": "{{ redis_slowlog_2_4 }}"
   advanced: "{{ redis_advanced_2_4 }}"
 
@@ -359,7 +397,7 @@ redis_config_2_6: &redis_config_2_6
   replication: "{{ redis_replication_2_6 }}"
   security: "{{ redis_security_2_6 }}"
   limits: "{{ redis_limits_2_6 }}"
-  "append mode only": "{{ redis_amo_2_6 }}"
+  "append only mode": "{{ redis_aom_2_6 }}"
   "lua scripting": "{{ redis_lua_2_6 }}"
   "slow log": "{{ redis_slowlog_2_6 }}"
   advanced: "{{ redis_advanced_2_6 }}"
@@ -370,7 +408,7 @@ redis_config_2_8: &redis_config_2_8
   replication: "{{ redis_replication_2_8 }}"
   security: "{{ redis_security_2_8 }}"
   limits: "{{ redis_limits_2_8 }}"
-  "append mode only": "{{ redis_amo_2_8 }}"
+  "append only mode": "{{ redis_aom_2_8 }}"
   "lua scripting": "{{ redis_lua_2_8 }}"
   "slow log": "{{ redis_slowlog_2_8 }}"
   "latency monitor": "{{ redis_latencymon_2_8 }}"
@@ -378,8 +416,14 @@ redis_config_2_8: &redis_config_2_8
   advanced: "{{ redis_advanced_2_8 }}"
 
 redis_config:
-  << : *redis_config_2_4
+  << : *redis_config_2_8
 ```
+
+
+Dependencies
+------------
+
+- [Config Encoders](https://github.com/jtyr/ansible/blob/jtyr-config_encoders/lib/ansible/plugins/filter/config_encoders.py)
 
 
 License
