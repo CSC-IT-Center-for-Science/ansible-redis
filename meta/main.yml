@@ -2,7 +2,7 @@
 
 galaxy_info:
   author: Jiri Tyr
-  description: A role that installs Redis
+  description: A role that installs Redis.
   license: MIT
   min_ansible_version: 2.0
   platforms:
@@ -12,4 +12,5 @@ galaxy_info:
         - 7
   categories:
     - database:nosql
-dependencies: []
+dependencies:
+  - config_encoder_filters
