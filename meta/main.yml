@@ -12,5 +12,5 @@ galaxy_info:
         - 7
   categories:
     - database:nosql
-dependencies: []
-#  - config_encoder_filters
+dependencies:
+  - config_encoder_filters

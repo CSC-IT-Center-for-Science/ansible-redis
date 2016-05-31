@@ -411,7 +411,10 @@ redis_config:
 Dependencies
 ------------
 
+It is possible to fullfil this dependency by just adding the below as a role to the playbook:
+
 - [`config_encoder_filters`](https://github.com/jtyr/ansible-config_encoder_filters)
+
 
 
 License
