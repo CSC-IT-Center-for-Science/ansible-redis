@@ -35,7 +35,7 @@ redis_general_bind: 127.0.0.1
 redis_general_unixsocket: /tmp/redis.sock
 redis_general_unixsocketperm: 700
 redis_general_timeout: 0
-redis_general_tcp_keepalive: 0
+redis_general_tcp_keepalive: 300
 redis_general_loglevel: notice
 redis_general_logfile: /var/log/redis/redis.log
 redis_general_syslog_enabled: "no"
@@ -76,7 +76,7 @@ redis_snapshotting_stop_writes_on_bgsave_error: "yes"
 redis_snapshotting_rdbcompression: "yes"
 redis_snapshotting_rdbchecksum: "yes"
 redis_snapshotting_dbfilename: dump.rdb
-redis_snapshotting_dir: /var/lib/redis/
+redis_snapshotting_dir: /var/lib/redis
 
 redis_snapshotting_2_4: &redis_snapshotting_2_4
   save: "{{ redis_snapshotting_save }}"
@@ -168,7 +168,7 @@ redis_limits_2_8: &redis_limits_2_8
 
 # Append only mode
 redis_aom_appendonly: "no"
-redis_aom_appendfilename: appendonly.aof
+redis_aom_appendfilename: "appendonly.aof"
 redis_aom_appendfsync: everysec
 redis_aom_no_appendfsync_on_rewrite: "no"
 redis_aom_auto_aof_rewrite_percentage: 100
